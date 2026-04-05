@@ -17,7 +17,7 @@ export default function CheckoutModal({ isOpen, onClose, items, total }: Checkou
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [formData, setFormData] = useState({
-    name: auth.currentUser?.displayName || '',
+    name: '',
     phone: '',
     address: '',
     notes: ''
@@ -25,11 +25,7 @@ export default function CheckoutModal({ isOpen, onClose, items, total }: Checkou
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!auth.currentUser) {
-      alert("Por favor, inicia sesión para finalizar tu compra.");
-      return;
-    }
-
+    
     setLoading(true);
     try {
       const batch = writeBatch(db);
@@ -38,8 +34,8 @@ export default function CheckoutModal({ isOpen, onClose, items, total }: Checkou
 
       const orderData = {
         id: newOrderRef.id,
-        userId: auth.currentUser.uid,
-        userEmail: auth.currentUser.email,
+        userId: auth.currentUser?.uid || 'guest',
+        userEmail: auth.currentUser?.email || 'guest@hilosmagicos.com',
         customerName: formData.name,
         customerPhone: formData.phone,
         customerAddress: formData.address,

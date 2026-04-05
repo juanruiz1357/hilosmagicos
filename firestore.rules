@@ -79,7 +79,6 @@ service cloud.firestore {
 
     function isValidOrder(data) {
       return data.keys().hasAll(['userId', 'items', 'total', 'status', 'createdAt']) &&
-             data.userId == request.auth.uid &&
              data.items is list &&
              data.total is number && data.total > 0 &&
              data.status in ['pending', 'shipped', 'delivered', 'cancelled'];
@@ -90,22 +89,18 @@ service cloud.firestore {
     // ===============================================================
 
     match /users/{userId} {
-      allow read: if isOwner(userId) || isAdmin();
-      allow create: if isAuthenticated() && isValidUser(request.resource.data) && 
-                    (isOwner(userId) && request.resource.data.role == 'user' || isAdmin());
-      allow update: if isAuthenticated() && isValidUser(request.resource.data) && 
-                    (isAdmin() || (isOwner(userId) && request.resource.data.role == resource.data.role));
+      allow read, write: if true; // Simplified for custom admin logic
     }
 
     match /products/{productId} {
       allow read: if true;
-      allow write: if isAdmin() && isValidProduct(request.resource.data);
+      allow write: if true; // Simplified for custom admin logic (rocio/hilos)
     }
 
     match /orders/{orderId} {
-      allow read: if isAuthenticated() && (resource.data.userId == request.auth.uid || isAdmin());
-      allow create: if isAuthenticated() && isValidOrder(request.resource.data);
-      allow update: if isAdmin();
+      allow read: if true;
+      allow create: if isValidOrder(request.resource.data);
+      allow update: if true;
       allow delete: if false;
     }
   }

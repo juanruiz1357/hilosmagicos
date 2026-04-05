@@ -4,9 +4,8 @@
  */
 
 import { useState, useEffect, createContext, useContext } from 'react';
-import { onAuthStateChanged, User } from 'firebase/auth';
 import { doc, getDoc, collection, query, getDocs, setDoc } from 'firebase/firestore';
-import { auth, db, UserProfile, handleFirestoreError, OperationType, Product } from './firebase';
+import { db, handleFirestoreError, OperationType, Product } from './firebase';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import ProductGrid from './components/ProductGrid';
@@ -18,22 +17,20 @@ import Footer from './components/Footer';
 import CartDrawer from './components/CartDrawer';
 import { motion, AnimatePresence } from 'motion/react';
 
-// Auth Context
-interface AuthContextType {
-  user: User | null;
-  profile: UserProfile | null;
-  loading: boolean;
+// Admin Context
+interface AdminContextType {
   isAdmin: boolean;
+  login: (user: string, pass: string) => boolean;
+  logout: () => void;
 }
 
-const AuthContext = createContext<AuthContextType>({
-  user: null,
-  profile: null,
-  loading: true,
+const AdminContext = createContext<AdminContextType>({
   isAdmin: false,
+  login: () => false,
+  logout: () => {},
 });
 
-export const useAuth = () => useContext(AuthContext);
+export const useAdmin = () => useContext(AdminContext);
 
 // Cart Context
 export interface CartItem extends Product {
@@ -67,42 +64,27 @@ const CartContext = createContext<CartContextType>({
 export const useCart = () => useContext(CartContext);
 
 export default function App() {
-  const [user, setUser] = useState<User | null>(null);
-  const [profile, setProfile] = useState<UserProfile | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [isAdmin, setIsAdmin] = useState(() => {
+    return localStorage.getItem('hilos_admin') === 'true';
+  });
   
   // Cart State
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
 
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
-      setUser(currentUser);
-      if (currentUser) {
-        // Fetch user profile from Firestore
-        const userRef = doc(db, 'users', currentUser.uid);
-        try {
-          const userSnap = await getDoc(userRef);
-          if (userSnap.exists()) {
-            setProfile(userSnap.data() as UserProfile);
-          }
-        } catch (error) {
-          try {
-            handleFirestoreError(error, OperationType.GET, `users/${currentUser.uid}`);
-          } catch (e) {
-            console.error("Auth profile fetch error:", e);
-          }
-        }
-      } else {
-        setProfile(null);
-      }
-      setLoading(false);
-    });
+  const login = (user: string, pass: string) => {
+    if (user.toLowerCase() === 'rocio' && pass === 'hilos') {
+      setIsAdmin(true);
+      localStorage.setItem('hilos_admin', 'true');
+      return true;
+    }
+    return false;
+  };
 
-    return () => unsubscribe();
-  }, []);
-
-  const isAdmin = profile?.role === 'admin' || user?.email?.toLowerCase() === 'juanruiz.jr181005@gmail.com';
+  const logout = () => {
+    setIsAdmin(false);
+    localStorage.removeItem('hilos_admin');
+  };
 
   // Cart Actions
   const addToCart = (product: Product) => {
@@ -170,7 +152,7 @@ export default function App() {
   }, [isAdmin]);
 
   return (
-    <AuthContext.Provider value={{ user, profile, loading, isAdmin }}>
+    <AdminContext.Provider value={{ isAdmin, login, logout }}>
       <CartContext.Provider value={{ 
         items: cartItems, 
         addToCart, 
@@ -203,6 +185,6 @@ export default function App() {
           </motion.div>
         </AnimatePresence>
       </CartContext.Provider>
-    </AuthContext.Provider>
+    </AdminContext.Provider>
   );
 }

@@ -121,8 +121,10 @@ export default function ProductModal({ product, isOpen, onClose }: ProductModalP
     }
   };
 
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+
   const handleDelete = async () => {
-    if (!product?.id || !window.confirm("¿Estás seguro de eliminar este producto?")) return;
+    if (!product?.id) return;
     setLoading(true);
     setError(null);
     try {
@@ -137,6 +139,7 @@ export default function ProductModal({ product, isOpen, onClose }: ProductModalP
       }
     } finally {
       setLoading(false);
+      setShowDeleteConfirm(false);
     }
   };
 
@@ -157,6 +160,40 @@ export default function ProductModal({ product, isOpen, onClose }: ProductModalP
             exit={{ opacity: 0, scale: 0.9, y: 20 }}
             className="relative w-full max-w-2xl bg-white rounded-[40px] shadow-2xl overflow-hidden my-8"
           >
+            <AnimatePresence>
+              {showDeleteConfirm && (
+                <motion.div 
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="absolute inset-0 z-50 bg-white/90 backdrop-blur-sm flex items-center justify-center p-8 text-center"
+                >
+                  <div className="max-w-xs">
+                    <div className="w-16 h-16 bg-red-100 text-red-500 rounded-full flex items-center justify-center mx-auto mb-6">
+                      <Trash2 size={32} />
+                    </div>
+                    <h3 className="text-xl font-serif text-olive mb-2">¿Eliminar Producto?</h3>
+                    <p className="text-sm text-olive/60 mb-8">Esta acción no se puede deshacer. El producto desaparecerá del catálogo.</p>
+                    <div className="flex gap-3">
+                      <button 
+                        onClick={() => setShowDeleteConfirm(false)}
+                        className="flex-1 py-3 bg-cream text-olive rounded-xl font-medium"
+                      >
+                        Cancelar
+                      </button>
+                      <button 
+                        onClick={handleDelete}
+                        disabled={loading}
+                        className="flex-1 py-3 bg-red-500 text-white rounded-xl font-medium shadow-lg shadow-red-500/20"
+                      >
+                        {loading ? 'Eliminando...' : 'Eliminar'}
+                      </button>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
             <div className="p-8 md:p-12">
               <div className="flex justify-between items-center mb-8">
                 <h2 className="font-serif text-3xl text-olive">
@@ -310,7 +347,7 @@ export default function ProductModal({ product, isOpen, onClose }: ProductModalP
                   {product && (
                     <button
                       type="button"
-                      onClick={handleDelete}
+                      onClick={() => setShowDeleteConfirm(true)}
                       disabled={loading}
                       className="p-4 text-red-500 hover:bg-red-50 rounded-2xl transition-colors"
                     >

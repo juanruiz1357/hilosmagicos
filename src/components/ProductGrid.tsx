@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { ShoppingBag, Heart, Star, Edit3, Plus, ShieldAlert } from 'lucide-react';
 import { collection, onSnapshot, query, orderBy } from 'firebase/firestore';
 import { db, Product, handleFirestoreError, OperationType } from '../firebase';
-import { useAuth, useCart } from '../App';
+import { useAdmin, useCart } from '../App';
 import ProductModal from './ProductModal';
 
 export default function ProductGrid() {
@@ -12,7 +12,7 @@ export default function ProductGrid() {
   const [error, setError] = useState<string | null>(null);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const { isAdmin } = useAuth();
+  const { isAdmin } = useAdmin();
   const { addToCart } = useCart();
 
   useEffect(() => {

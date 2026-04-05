@@ -1,13 +1,10 @@
 import { motion } from 'motion/react';
-import { ArrowRight, Shield } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import { useState } from 'react';
 import CustomOrderModal from './CustomOrderModal';
-import { useAuth } from '../App';
-import { signInWithGoogle } from '../firebase';
 
 export default function Hero() {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const { user } = useAuth();
 
   return (
     <section id="inicio" className="relative h-screen flex items-center justify-center overflow-hidden pt-20">
@@ -76,19 +73,6 @@ export default function Hero() {
               Pedido Personalizado
             </button>
           </motion.div>
-
-          {!user && (
-            <motion.button
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 1.2 }}
-              onClick={signInWithGoogle}
-              className="mt-8 flex items-center gap-2 mx-auto text-xs font-semibold text-olive/40 hover:text-gold transition-colors"
-            >
-              <Shield size={14} />
-              Acceso Administrador
-            </motion.button>
-          )}
         </motion.div>
       </div>
 
