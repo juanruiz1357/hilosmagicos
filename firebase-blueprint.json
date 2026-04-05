@@ -1,0 +1,61 @@
+{
+  "entities": {
+    "User": {
+      "title": "User Profile",
+      "description": "Information about the user, including their role.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "description": "The unique ID of the user." },
+        "email": { "type": "string", "format": "email", "description": "The user's email address." },
+        "displayName": { "type": "string", "description": "The user's display name." },
+        "photoURL": { "type": "string", "description": "The user's profile photo URL." },
+        "role": { "type": "string", "enum": ["admin", "user"], "description": "The user's role (admin or user)." },
+        "createdAt": { "type": "string", "format": "date-time", "description": "When the user profile was created." }
+      },
+      "required": ["uid", "email", "role"]
+    },
+    "Product": {
+      "title": "Bracelet Product",
+      "description": "A bracelet available for sale.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Unique product ID." },
+        "name": { "type": "string", "description": "Name of the bracelet." },
+        "description": { "type": "string", "description": "Detailed description." },
+        "price": { "type": "number", "description": "Price in local currency." },
+        "image": { "type": "string", "description": "URL of the product image." },
+        "category": { "type": "string", "description": "Category (e.g., Spiritual, Protection)." },
+        "stock": { "type": "integer", "description": "Available quantity." }
+      },
+      "required": ["name", "price", "image"]
+    },
+    "Order": {
+      "title": "Customer Order",
+      "description": "An order placed by a user.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Unique order ID." },
+        "userId": { "type": "string", "description": "ID of the user who placed the order." },
+        "items": { "type": "array", "items": { "type": "object" }, "description": "List of products in the order." },
+        "total": { "type": "number", "description": "Total amount paid." },
+        "status": { "type": "string", "enum": ["pending", "shipped", "delivered", "cancelled"], "description": "Order status." },
+        "createdAt": { "type": "string", "format": "date-time", "description": "When the order was placed." }
+      },
+      "required": ["userId", "items", "total", "status"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "User profile documents."
+    },
+    "/products/{productId}": {
+      "schema": "Product",
+      "description": "Product catalog."
+    },
+    "/orders/{orderId}": {
+      "schema": "Order",
+      "description": "Customer orders."
+    }
+  }
+}

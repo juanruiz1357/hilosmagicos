@@ -1,0 +1,5 @@
+{
+  "name": "Hilos Mágicos",
+  "description": "Tienda artesanal de pulseras personalizadas con un toque mágico.",
+  "requestFramePermissions": ["camera"]
+}
