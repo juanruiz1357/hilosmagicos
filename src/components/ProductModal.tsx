@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, Save, Trash2, Camera, RefreshCw, Check, AlertCircle } from 'lucide-react';
+import { X, Save, Trash2, Camera, RefreshCw, Check, AlertCircle, Image as ImageIcon } from 'lucide-react';
 import { Product, db, handleFirestoreError, OperationType } from '../firebase';
 import { doc, setDoc, updateDoc, deleteDoc, collection } from 'firebase/firestore';
 
@@ -79,6 +79,19 @@ export default function ProductModal({ product, isOpen, onClose }: ProductModalP
         setFormData({ ...formData, image: imageData });
         stopCamera();
       }
+    }
+  };
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setFormData({ ...formData, image: reader.result as string });
+      };
+      reader.readAsDataURL(file);
     }
   };
 
@@ -269,14 +282,31 @@ export default function ProductModal({ product, isOpen, onClose }: ProductModalP
                     <div>
                       <div className="flex justify-between items-center mb-2">
                         <label className="block text-xs font-semibold text-olive/50 uppercase tracking-widest">Imagen del Producto</label>
-                        <button
-                          type="button"
-                          onClick={isCameraActive ? stopCamera : startCamera}
-                          className={`text-xs font-bold flex items-center gap-1 transition-colors ${isCameraActive ? 'text-red-500' : 'text-gold'}`}
-                        >
-                          {isCameraActive ? <X size={14} /> : <Camera size={14} />}
-                          {isCameraActive ? 'Cancelar Cámara' : 'Usar Cámara'}
-                        </button>
+                        <div className="flex items-center gap-3">
+                          <button
+                            type="button"
+                            onClick={() => fileInputRef.current?.click()}
+                            className="text-xs font-bold flex items-center gap-1 text-gold hover:text-gold/80 transition-colors"
+                          >
+                            <ImageIcon size={14} />
+                            Galería
+                          </button>
+                          <button
+                            type="button"
+                            onClick={isCameraActive ? stopCamera : startCamera}
+                            className={`text-xs font-bold flex items-center gap-1 transition-colors ${isCameraActive ? 'text-red-500' : 'text-gold'}`}
+                          >
+                            {isCameraActive ? <X size={14} /> : <Camera size={14} />}
+                            {isCameraActive ? 'Cancelar Cámara' : 'Usar Cámara'}
+                          </button>
+                        </div>
+                        <input
+                          type="file"
+                          ref={fileInputRef}
+                          onChange={handleFileChange}
+                          accept="image/*"
+                          className="hidden"
+                        />
                       </div>
 
                       {isCameraActive ? (
